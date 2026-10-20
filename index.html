@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZOO MOVE - Jom Tiru Pergerakan Haiwan!</title>
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-color: #f3f9e7;
+      --primary: #4caf50;
+      --primary-dark: #388e3c;
+      --accent-frog: #8bc34a;
+      --accent-tiger: #ff9800;
+      --accent-turtle: #009688;
+      --accent-duck: #ffcb2e;
+      --card-bg: #ffffff;
+      --text-dark: #2c3e50;
+      --shadow: 0 10px 25px rgba(0,0,0,0.1);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Fredoka', 'Quicksand', sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-image: 
+        radial-gradient(#c8e6c9 15%, transparent 16%),
+        radial-gradient(#ffe0b2 15%, transparent 16%);
+      background-size: 60px 60px;
+      background-position: 0 0, 30px 30px;
+      overflow-x: hidden;
+      padding: 15px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 900px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 6px solid #a5d6a7;
+      padding: 25px;
+      position: relative;
+      min-height: 650px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Screen Views */
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 100%;
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Typography & Buttons */
+    h1 {
+      font-size: 3rem;
+      color: #2e7d32;
+      text-shadow: 3px 3px 0px #c8e6c9;
+      margin-bottom: 5px;
+    }
+
+    p.tagline {
+      font-size: 1.4rem;
+      color: #558b2f;
+      font-weight: 600;
+      margin-bottom: 25px;
+    }
+
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 6px 0 var(--primary-dark), 0 10px 15px rgba(0,0,0,0.15);
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 10px;
+      width: 85%;
+      max-width: 380px;
+    }
+
+    .btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 var(--primary-dark);
+    }
+
+    .btn-orange { background: #ff9800; box-shadow: 0 6px 0 #e65100; }
+    .btn-blue { background: #2196f3; box-shadow: 0 6px 0 #1565c0; }
+    .btn-purple { background: #9c27b0; box-shadow: 0 6px 0 #6a1b9a; }
+    .btn-red { background: #f44336; box-shadow: 0 6px 0 #c62828; }
+
+    /* Animals Grid */
+    .animal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      width: 100%;
+      margin: 20px 0;
+    }
+
+    .animal-card {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      border: 4px solid #e0e0e0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .animal-card:hover {
+      transform: scale(1.05);
+    }
+
+    .animal-card.frog { border-color: var(--accent-frog); background: #f1f8e9; }
+    .animal-card.tiger { border-color: var(--accent-tiger); background: #fff3e0; }
+    .animal-card.turtle { border-color: var(--accent-turtle); background: #e0f2f1; }
+    .animal-card.duck { border-color: var(--accent-duck); background: #fffde7; }
+
+    .animal-emoji {
+      font-size: 4.5rem;
+      margin-bottom: 10px;
+    }
+
+    .animal-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    .animal-action {
+      font-size: 1.1rem;
+      color: #666;
+    }
+
+    /* Video Player Box */
+    .video-box {
+      width: 100%;
+      max-width: 550px;
+      height: 300px;
+      background: #000;
+      border-radius: 20px;
+      overflow: hidden;
+      margin: 15px 0;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 5px solid #fff;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .video-box video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .video-placeholder {
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    /* Voice indicator badge */
+    .voice-badge {
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      margin-top: 5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 2.2rem; }
+      p.tagline { font-size: 1.1rem; }
+      .btn { font-size: 1.2rem; padding: 12px 24px; }
+      .video-box { height: 220px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- 1. HOME SCREEN -->
+    <div id="screen-home" class="screen active">
+      <h1>ZOO MOVE</h1>
+      <p class="tagline">"Jom Tiru Pergerakan Haiwan!"</p>
+      
+      <div style="display:flex; gap: 15px; font-size: 3.5rem; margin-bottom: 20px;">
+        <span>🐸</span><span>🐯</span><span>🐢</span><span>🦆</span>
+      </div>
+
+      <button class="btn" onclick="navigateTo('screen-select')"><i class="fa-solid fa-play"></i> MULA</button>
+      <button class="btn btn-orange" onclick="showHowToPlay()"><i class="fa-solid fa-volume-high"></i> CARA BERMAIN</button>
+      <button class="btn btn-purple" onclick="startSimonSays()"><i class="fa-solid fa-trophy"></i> SIMON SAYS</button>
+
+      <div class="voice-badge"><i class="fa-solid fa-face-smile"></i> Suara Comel Auto-Active</div>
+    </div>
+
+    <!-- 2. PILIH HAIWAN -->
+    <div id="screen-select" class="screen">
+      <h2>PILIH HAIWAN</h2>
+      <p style="margin-bottom: 15px;">Tekan haiwan yang kamu mahu tiru!</p>
+
+      <div class="animal-grid">
+        <div class="animal-card frog" onclick="selectAnimal('frog')">
+          <div class="animal-emoji">🐸</div>
+          <div class="animal-title">KATAK</div>
+          <div class="animal-action">Melompat</div>
+        </div>
+        <div class="animal-card tiger" onclick="selectAnimal('tiger')">
+          <div class="animal-emoji">🐯</div>
+          <div class="animal-title">HARIMAU</div>
+          <div class="animal-action">Berlari</div>
+        </div>
+        <div class="animal-card turtle" onclick="selectAnimal('turtle')">
+          <div class="animal-emoji">🐢</div>
+          <div class="animal-title">KURA-KURA</div>
+          <div class="animal-action">Merangkak</div>
+        </div>
+        <div class="animal-card duck" onclick="selectAnimal('duck')">
+          <div class="animal-emoji">🦆</div>
+          <div class="animal-title">ITIK</div>
+          <div class="animal-action">Jalan Itik</div>
+        </div>
+      </div>
+
+      <button class="btn btn-red" onclick="navigateTo('screen-home')"><i class="fa-solid fa-house"></i> UTAMA</button>
+    </div>
+
+    <!-- 3. LEVEL 1: BELAJAR BERGERAK -->
+    <div id="screen-level1" class="screen">
+      <h3 id="l1-title" style="color: var(--primary-dark); font-size: 2rem;">LEVEL 1: BELAJAR</h3>
+      <p id="l1-step" style="font-size: 1.3rem; color: #ff9800; font-weight: bold; margin: 5px 0;"></p>
+
+      <div class="video-box">
+        <video id="l1-video" controls poster="">
+          <source id="l1-video-src" src="" type="video/mp4">
+        </video>
+        <div id="l1-video-placeholder" class="video-placeholder">
+          <div id="l1-emoji" style="font-size: 4rem;">🐸</div>
+          <p id="l1-placeholder-text">Video Pembelajaran</p>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; justify-content: center; width: 100%;">
+        <button class="btn btn-blue" onclick="playL1Audio()"><i class="fa-solid fa-volume-high"></i> DENGAR ARAHAN</button>
+        <button class="btn" onclick="nextL1Step()"><i class="fa-solid fa-forward"></i> SETERUSNYA</button>
+      </div>
+
+      <button class="btn btn-red" onclick="navigateTo('screen-select')" style="width: auto; padding: 10px 20px; font-size: 1rem; margin-top: 15px;">🏠 Tukar Haiwan</button>
+    </div>
+
+    <!-- 4. LEVEL 2: ANIMAL MISSION -->
+    <div id="screen-level2" class="screen">
+      <h2 style="color: #e65100;">🎉 TAHNIAH!</h2>
+      <p>Kamu sudah pandai! Sekarang masa untuk Misi!</p>
+
+      <div class="video-box" style="border-color: #ff9800;">
+        <video id="l2-video" controls>
+          <source id="l2-video-src" src="" type="video/mp4">
+        </video>
+        <div id="l2-video-placeholder" class="video-placeholder">
+          <div id="l2-emoji" style="font-size: 4rem;">🐸</div>
+          <p id="l2-mission-text" style="font-size: 1.2rem; font-weight: bold;"></p>
+        </div>
+      </div>
+
+      <button class="btn btn-orange" onclick="playL2Audio()"><i class="fa-solid fa-volume-high"></i> DENGAR MISI</button>
+      <button class="btn" onclick="startCountdownMission()"><i class="fa-solid fa-flag-checkered"></i> MULA MISI FIZIKAL</button>
+    </div>
+
+    <!-- 5. COUNTDOWN SCREEN -->
+    <div id="screen-countdown" class="screen" style="justify-content: center;">
+      <h2 id="cd-title">Sedia...</h2>
+      <div id="cd-number" style="font-size: 8rem; color: #ff9800; font-weight: bold; margin: 20px 0;">3</div>
+    </div>
+
+    <!-- 6. SIMON SAYS SCREEN -->
+    <div id="screen-simon" class="screen">
+      <h2>🏆 ZOO MOVE SIMON SAYS</h2>
+      <p id="simon-round" style="color: #9c27b0; font-size: 1.4rem; font-weight: bold;">ROUND 1 — PERLAHAN</p>
+
+      <div style="background: #f3e5f5; border: 4px dashed #9c27b0; border-radius: 20px; padding: 25px; width: 100%; margin: 20px 0; min-height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <p style="font-size: 1.1rem; color: #666;">Dengar arahan ini:</p>
+        <h3 id="simon-command" style="font-size: 2.2rem; color: #4a148c; margin-top: 10px;">"Tekan Mula!"</h3>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; justify-content: center; width: 100%;">
+        <button id="simon-start-btn" class="btn btn-purple" onclick="runSimonSaysGame()"><i class="fa-solid fa-play"></i> MULA ARAHAN</button>
+        <button class="btn btn-blue" onclick="repeatSimonCommand()"><i class="fa-solid fa-rotate-right"></i> ULANG ARAHAN</button>
+      </div>
+
+      <button class="btn btn-red" onclick="stopSimonSays()"><i class="fa-solid fa-house"></i> UTAMA</button>
+    </div>
+
+    <!-- 7. FINISH / WIN SCREEN -->
+    <div id="screen-finish" class="screen">
+      <div style="font-size: 5rem;">🏆</div>
+      <h1 style="color: #ff9800;">TAHNIAH!</h1>
+      <p style="font-size: 1.5rem; margin: 10px 0;">Kamu adalah <b>ZOO MOVE CHAMPION</b>!</p>
+      <p style="color: #666; margin-bottom: 25px;">Kamu dah berjaya kuasai semua pergerakan haiwan!</p>
+
+      <button class="btn" onclick="navigateTo('screen-select')"><i class="fa-solid fa-rotate-right"></i> MAIN LAGI</button>
+      <button class="btn btn-red" onclick="navigateTo('screen-home')"><i class="fa-solid fa-house"></i> MENU UTAMA</button>
+    </div>
+
+  </div>
+
+  <script>
+    // DATA HAIWAN & BUKTI TEKS PERGERAKAN
+    const animalData = {
+      frog: {
+        name: "KATAK",
+        emoji: "🐸",
+        steps: [
+          { text: "Lompat satu kali!", speech: "Jom lompat satu kali!", file: "frog-1.mp3" },
+          { text: "Lompat dua kali!", speech: "Lompat dua kali! Satu, dua!", file: "frog-2.mp3" },
+          { text: "Lompat tiga kali!", speech: "Lompat tiga kali! Satu, dua, tiga!", file: "frog-3.mp3" },
+          { text: "Lompat ke KIRI!", speech: "Lompat ke kiri!", file: "frog-left.mp3" },
+          { text: "Lompat ke KANAN!", speech: "Lompat ke kanan!", file: "frog-right.mp3" }
+        ],
+        mission: "Lompat dari satu lily pad ke lily pad yang lain. Jangan pijak air!",
+        l1Video: "assets/videos/frog-level1.mp4",
+        l2Video: "assets/videos/frog-level2.mp4"
+      },
+      tiger: {
+        name: "HARIMAU",
+        emoji: "🐯",
+        steps: [
+          { text: "Lari satu kali!", speech: "Lari satu kali!", file: "tiger-1.mp3" },
+          { text: "Lari dua kali!", speech: "Lari dua kali!", file: "tiger-2.mp3" },
+          { text: "Lari tiga kali!", speech: "Lari tiga kali!", file: "tiger-3.mp3" },
+          { text: "Lari ke KIRI!", speech: "Lari ke kiri!", file: "tiger-left.mp3" },
+          { text: "Lari ke KANAN!", speech: "Lari ke kanan!", file: "tiger-right.mp3" }
+        ],
+        mission: "Lari ikut laluan harimau sehingga sampai ke garisan penamat!",
+        l1Video: "assets/videos/tiger-level1.mp4",
+        l2Video: "assets/videos/tiger-level2.mp4"
+      },
+      turtle: {
+        name: "KURA-KURA",
+        emoji: "🐢",
+        steps: [
+          { text: "Merangkak satu kali!", speech: "Merangkak satu kali!", file: "turtle-1.mp3" },
+          { text: "Merangkak dua kali!", speech: "Merangkak dua kali!", file: "turtle-2.mp3" },
+          { text: "Merangkak tiga kali!", speech: "Merangkak tiga kali!", file: "turtle-3.mp3" },
+          { text: "Merangkak ke KIRI!", speech: "Merangkak ke kiri!", file: "turtle-left.mp3" },
+          { text: "Merangkak ke KANAN!", speech: "Merangkak ke kanan!", file: "turtle-right.mp3" }
+        ],
+        mission: "Merangkak melalui terowong sehingga sampai ke rumah kura-kura!",
+        l1Video: "assets/videos/turtle-level1.mp4",
+        l2Video: "assets/videos/turtle-level2.mp4"
+      },
+      duck: {
+        name: "ITIK",
+        emoji: "🦆",
+        steps: [
+          { text: "Jalan itik satu langkah!", speech: "Jalan itik satu langkah!", file: "duck-1.mp3" },
+          { text: "Jalan itik dua langkah!", speech: "Jalan itik dua langkah!", file: "duck-2.mp3" },
+          { text: "Jalan itik tiga langkah!", speech: "Jalan itik tiga langkah!", file: "duck-3.mp3" },
+          { text: "Jalan itik ke KIRI!", speech: "Jalan itik ke kiri!", file: "duck-left.mp3" },
+          { text: "Jalan itik ke KANAN!", speech: "Jalan itik ke kanan!", file: "duck-right.mp3" }
+        ],
+        mission: "Berjalan mencangkung seperti itik sehingga sampai ke kolam!",
+        l1Video: "assets/videos/duck-level1.mp4",
+        l2Video: "assets/videos/duck-level2.mp4"
+      }
+    };
+
+    let currentAnimal = 'frog';
+    let currentStepIndex = 0;
+    let simonActive = false;
+    let currentSimonText = "";
+
+    // 🔊 ENGINE SUARA COMEL (PITCH UNTUK KANAK-KANAK)
+    function speakCuteVoice(text, onEndCallback = null) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // Stop sebarang audio terdahulu
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'id-ID'; // Gunakan BM/ID
+        utterance.pitch = 1.4;    // Pitch tinggi untuk suara comel/kartun
+        utterance.rate = 0.88;     // Kadar kelajuan yang sesuai untuk murid prasekolah
+
+        if (onEndCallback) {
+          utterance.onend = onEndCallback;
+        }
+
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // NAVIGATION
+    function navigateTo(screenId) {
+      window.speechSynthesis.cancel();
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    // PILIH HAIWAN
+    function selectAnimal(key) {
+      currentAnimal = key;
+      currentStepIndex = 0;
+      setupLevel1();
+      navigateTo('screen-level1');
+    }
+
+    // LEVEL 1 SETUP & CONTROLS
+    function setupLevel1() {
+      const data = animalData[currentAnimal];
+      document.getElementById('l1-title').innerText = `${data.emoji} ${data.name} (LEVEL 1)`;
+      document.getElementById('l1-emoji').innerText = data.emoji;
+      
+      const stepData = data.steps[currentStepIndex];
+      document.getElementById('l1-step').innerText = `Tahap ${currentStepIndex + 1}: ${stepData.text}`;
+
+      // Video source fallback
+      const videoElem = document.getElementById('l1-video');
+      const placeholder = document.getElementById('l1-video-placeholder');
+      videoElem.src = data.l1Video;
+      videoElem.style.display = "none";
+      placeholder.style.display = "block";
+
+      videoElem.onerror = () => {
+        videoElem.style.display = "none";
+        placeholder.style.display = "block";
+      };
+
+      playL1Audio();
+    }
+
+    function playL1Audio() {
+      const stepData = animalData[currentAnimal].steps[currentStepIndex];
+      speakCuteVoice(stepData.speech);
+    }
+
+    function nextL1Step() {
+      currentStepIndex++;
+      if (currentStepIndex < animalData[currentAnimal].steps.length) {
+        setupLevel1();
+      } else {
+        setupLevel2();
+        navigateTo('screen-level2');
+      }
+    }
+
+    // LEVEL 2 SETUP
+    function setupLevel2() {
+      const data = animalData[currentAnimal];
+      document.getElementById('l2-emoji').innerText = data.emoji;
+      document.getElementById('l2-mission-text').innerText = data.mission;
+
+      const videoElem = document.getElementById('l2-video');
+      const placeholder = document.getElementById('l2-video-placeholder');
+      videoElem.src = data.l2Video;
+      videoElem.style.display = "none";
+      placeholder.style.display = "block";
+
+      playL2Audio();
+    }
+
+    function playL2Audio() {
+      const data = animalData[currentAnimal];
+      const text = `Tahniah! Kamu dah pandai bergerak seperti ${data.name}. Sekarang misi kamu: ${data.mission}`;
+      speakCuteVoice(text);
+    }
+
+    // COUNTDOWN SYSTEM
+    function startCountdownMission() {
+      navigateTo('screen-countdown');
+      let count = 3;
+      document.getElementById('cd-number').innerText = count;
+      speakCuteVoice("Tiga");
+
+      let timer = setInterval(() => {
+        count--;
+        if (count > 0) {
+          document.getElementById('cd-number').innerText = count;
+          speakCuteVoice(count === 2 ? "Dua" : "Satu");
+        } else {
+          clearInterval(timer);
+          document.getElementById('cd-number').innerText = "MULA!";
+          speakCuteVoice("Mula!", () => {
+            setTimeout(() => {
+              navigateTo('screen-finish');
+            }, 1500);
+          });
+        }
+      }, 1200);
+    }
+
+    // SIMON SAYS SYSTEM
+    const simonCommands = [
+      { text: "Simon says, lompat ke kiri!", simon: true },
+      { text: "Simon says, lari ke kanan!", simon: true },
+      { text: "Merangkak ke kiri!", simon: false }, // TRAP
+      { text: "Simon says, jalan itik ke kanan!", simon: true },
+      { text: "Lompat ke kanan!", simon: false }, // TRAP
+      { text: "Simon says, merangkak ke kanan!", simon: true },
+      { text: "Simon says, lari ke kiri!", simon: true }
+    ];
+
+    function startSimonSays() {
+      simonActive = false;
+      document.getElementById('simon-command').innerText = "Tekan 'MULA' untuk bermula!";
+      navigateTo('screen-simon');
+      speakCuteVoice("Selamat datang ke Simon Says! Dengar arahan betul-betul ya!");
+    }
+
+    function runSimonSaysGame() {
+      simonActive = true;
+      let round = 1;
+      let cmdIndex = 0;
+
+      function nextCommand() {
+        if (!simonActive) return;
+
+        if (cmdIndex >= simonCommands.length) {
+          navigateTo('screen-finish');
+          return;
+        }
+
+        const cmd = simonCommands[cmdIndex];
+        currentSimonText = cmd.text;
+        document.getElementById('simon-command').innerText = `"${cmd.text}"`;
+        speakCuteVoice(cmd.text);
+
+        cmdIndex++;
+        setTimeout(nextCommand, 4500); // Masa tunggu arahan
+      }
+
+      nextCommand();
+    }
+
+    function repeatSimonCommand() {
+      if (currentSimonText) {
+        speakCuteVoice(currentSimonText);
+      }
+    }
+
+    function stopSimonSays() {
+      simonActive = false;
+      window.speechSynthesis.cancel();
+      navigateTo('screen-home');
+    }
+
+    function showHowToPlay() {
+      speakCuteVoice("Cara bermain: Dengar arahan aplikasi dan lakukan pergerakan haiwan bersama bahan fizikal ZOO MOVE anda. Guru akan perhatikan pergerakan kamu!");
+    }
+
+    // 📱 PENGESANAN QR CODE (HASH ROUTING AUTOMATIK)
+    function checkQRCodeHash() {
+      const hash = window.location.hash.toLowerCase();
+      if (hash === '#frog') selectAnimal('frog');
+      else if (hash === '#tiger') selectAnimal('tiger');
+      else if (hash === '#turtle') selectAnimal('turtle');
+      else if (hash === '#duck') selectAnimal('duck');
+      else if (hash === '#simon') startSimonSays();
+    }
+
+    // Semak Hash semasa mula-mula buka web app
+    window.addEventListener('load', checkQRCodeHash);
+    window.addEventListener('hashchange', checkQRCodeHash);
+  </script>
+</body>
+</html>
